@@ -3,6 +3,7 @@
 #include "page_file.h"
 #include "page_allocator.h"
 #include <cstdint>
+#include <cstring>
 
 using namespace std;
 
