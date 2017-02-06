@@ -1,7 +1,7 @@
 #include <iostream>
 #include "constant.h"
-#include "page_file.h"
-#include "page_allocator.h"
+#include "file_layer.h"
+#include "allocator_layer.h"
 #include <cstdint>
 #include <cstring>
 
@@ -16,7 +16,7 @@ result_t run()
     result_t result = success;
     remove("hello.db");
     {
-        page_allocator allocator;
+        allocator_layer allocator;
         IfFailRet(allocator.open("hello.db"));
         strcpy((char*)buffer, "World");
         int new_page_number;
@@ -25,7 +25,7 @@ result_t run()
         IfFailRet(allocator.close());
     }
     {
-        page_allocator allocator;
+        allocator_layer allocator;
         IfFailRet(allocator.open("hello.db"));
         IfFailRet(allocator.read_page(1, buffer));
         cout << (char*)buffer << endl;

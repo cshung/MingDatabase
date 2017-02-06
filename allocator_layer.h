@@ -1,19 +1,19 @@
 #pragma once
 
-#include "page_file.h"
+#include "file_layer.h"
 #include "result.h"
 
-class page_allocator_impl;
+class allocator_layer_impl;
 
-class page_allocator
+class allocator_layer
 {
 public:
-    page_allocator();
+    allocator_layer();
     result_t open(const char* file_name);
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);
     result_t allocate_page(int* new_page_number);
     result_t close();
 private:
-    page_allocator_impl* m_impl;
+    allocator_layer_impl* m_impl;
 };

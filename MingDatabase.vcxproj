@@ -142,19 +142,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="page_allocator.cpp" />
-    <ClCompile Include="page_file.cpp" />
+    <ClCompile Include="allocator_layer.cpp" />
+    <ClCompile Include="file_layer.cpp" />
     <ClCompile Include="program.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constant.h" />
-    <ClInclude Include="page_allocator.h" />
-    <ClInclude Include="page_file.h" />
+    <ClInclude Include="allocator_layer.h" />
+    <ClInclude Include="file_layer.h" />
     <ClInclude Include="result.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="page_allocator.forwarders.inl" />
-    <None Include="page_file.forwarders.inl" />
+    <None Include="allocator_layer.forwarders.inl" />
+    <None Include="file_layer.forwarders.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

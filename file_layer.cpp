@@ -1,4 +1,4 @@
-#include "page_file.h"
+#include "file_layer.h"
 #include "constant.h"
 #include <cstdio>
 #include <cstdint>
@@ -6,36 +6,36 @@
 // Stop bugging me with the secure versions of the APIs
 #pragma warning(disable: 4996)
 
-class page_file_impl
+class file_layer_impl
 {
 public:
-    page_file_impl();
-    ~page_file_impl();
+    file_layer_impl();
+    ~file_layer_impl();
     result_t open(const char* file_name);
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);
     result_t append_page(int* new_page_number);
     result_t close();
-    result_t set_page_file_listener(page_file_listener* page_file_listener);
+    result_t set_file_layer_listener(file_layer_listener* file_layer_listener);
 private:
     FILE* m_file;
     int m_num_pages;
-    page_file_listener* m_page_file_listener;
+    file_layer_listener* m_file_layer_listener;
 };
 
-#include "page_file.forwarders.inl"
+#include "file_layer.forwarders.inl"
 
-page_file_impl::page_file_impl()
+file_layer_impl::file_layer_impl()
 {
     this->m_file = nullptr;
-    this->m_page_file_listener = nullptr;
+    this->m_file_layer_listener = nullptr;
 }
 
-page_file_impl::~page_file_impl()
+file_layer_impl::~file_layer_impl()
 {
 }
 
-result_t page_file_impl::open(const char* file_name)
+result_t file_layer_impl::open(const char* file_name)
 {
     result_t result = result_t::success;
     this->m_file = fopen(file_name, "rb+");
@@ -48,9 +48,9 @@ result_t page_file_impl::open(const char* file_name)
         }
 
         this->m_num_pages = 0;
-        if (this->m_page_file_listener != nullptr)
+        if (this->m_file_layer_listener != nullptr)
         {
-            IfFailRet(this->m_page_file_listener->on_page_file_created());
+            IfFailRet(this->m_file_layer_listener->on_file_layer_created());
         }
     }
     else
@@ -61,15 +61,15 @@ result_t page_file_impl::open(const char* file_name)
         }
 
         this->m_num_pages = ftell(this->m_file) / PAGE_SIZE;
-        if (this->m_page_file_listener != nullptr)
+        if (this->m_file_layer_listener != nullptr)
         {
-            IfFailRet(this->m_page_file_listener->on_page_file_loaded());
+            IfFailRet(this->m_file_layer_listener->on_file_layer_loaded());
         }
     }
     return result;
 }
 
-result_t page_file_impl::close()
+result_t file_layer_impl::close()
 {
     if (fclose(this->m_file) != 0)
     {
@@ -79,7 +79,7 @@ result_t page_file_impl::close()
     return result_t::success;
 }
 
-result_t page_file_impl::read_page(int page_number, void* buffer)
+result_t file_layer_impl::read_page(int page_number, void* buffer)
 {
     if (page_number >= this->m_num_pages)
     {
@@ -99,7 +99,7 @@ result_t page_file_impl::read_page(int page_number, void* buffer)
     return result_t::success;
 }
 
-result_t page_file_impl::write_page(int page_number, void* buffer)
+result_t file_layer_impl::write_page(int page_number, void* buffer)
 {
     if (page_number >= this->m_num_pages)
     {
@@ -119,7 +119,7 @@ result_t page_file_impl::write_page(int page_number, void* buffer)
     return result_t::success;
 }
 
-result_t page_file_impl::append_page(int* new_page_size)
+result_t file_layer_impl::append_page(int* new_page_size)
 {
     if (new_page_size == nullptr)
     {
@@ -141,8 +141,8 @@ result_t page_file_impl::append_page(int* new_page_size)
     return result_t::success;
 }
 
-result_t page_file_impl::set_page_file_listener(page_file_listener* page_file_listener)
+result_t file_layer_impl::set_file_layer_listener(file_layer_listener* file_layer_listener)
 {
-    this->m_page_file_listener = page_file_listener;
+    this->m_file_layer_listener = file_layer_listener;
     return result_t::success;
 }

@@ -18,32 +18,32 @@
     <ClCompile Include="program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="page_file.cpp">
+    <ClCompile Include="file_layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="page_allocator.cpp">
+    <ClCompile Include="allocator_layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="page_file.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="constant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="result.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="page_allocator.h">
+    <ClInclude Include="file_layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="allocator_layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="page_file.forwarders.inl">
+    <None Include="file_layer.forwarders.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="page_allocator.forwarders.inl">
+    <None Include="allocator_layer.forwarders.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
