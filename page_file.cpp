@@ -46,18 +46,22 @@ result_t page_file_impl::open(const char* file_name)
         {
             return result_t::file_io_error;
         }
+
+        this->m_num_pages = 0;
         if (this->m_page_file_creation_listener != nullptr)
         {
             IfFailRet(this->m_page_file_creation_listener->on_page_file_created());
         }
     }
-
-    if (fseek(this->m_file, 0, SEEK_END) == -1)
+    else
     {
-        return result_t::file_io_error;
-    }
+        if (fseek(this->m_file, 0, SEEK_END) == -1)
+        {
+            return result_t::file_io_error;
+        }
 
-    this->m_num_pages = ftell(this->m_file) / PAGE_SIZE;
+        this->m_num_pages = ftell(this->m_file) / PAGE_SIZE;
+    }
     return result;
 }
 
@@ -82,10 +86,12 @@ result_t page_file_impl::read_page(int page_number, void* buffer)
     {
         return result_t::file_io_error;
     }
+
     if (fread(buffer, PAGE_SIZE, 1, this->m_file) != 1)
     {
         return result_t::file_io_error;
     }
+
     return result_t::success;
 }
 
@@ -121,10 +127,12 @@ result_t page_file_impl::append_page(int* new_page_size)
     {
         return result_t::file_io_error;
     }
+
     if (fwrite(blank_page, PAGE_SIZE, 1, this->m_file) != 1)
     {
         return result_t::file_io_error;
     }
+
     *new_page_size = this->m_num_pages++;
     return result_t::success;
 }
