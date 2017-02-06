@@ -23,5 +23,5 @@ private:
 class page_file_creation_listener
 {
 public:
-    virtual void on_page_file_created(page_file* page_file) = 0;
+    virtual result_t on_page_file_created() = 0;
 };

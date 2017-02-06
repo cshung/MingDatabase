@@ -1,6 +1,6 @@
 #pragma once
 
-#define IfFailRet(x) if ((result = x) != success) { goto error; }
+#define IfFailRet(x) if ((result = x) != success) { return result; }
 
 enum result_t
 {

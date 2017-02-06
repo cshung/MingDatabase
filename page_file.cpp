@@ -1,7 +1,6 @@
 #include "page_file.h"
 #include "constant.h"
 #include <cstdio>
-#include <errno.h>
 #include <cstdint>
 
 // Stop bugging me with the secure versions of the APIs
@@ -38,28 +37,33 @@ page_file_impl::~page_file_impl()
 
 result_t page_file_impl::open(const char* file_name)
 {
+    result_t result = result_t::success;
     this->m_file = fopen(file_name, "rb+");
     if (this->m_file == nullptr)
     {
         this->m_file = fopen(file_name, "wb+");
-        if (errno != 0)
+        if (this->m_file == nullptr)
         {
             return result_t::file_io_error;
         }
+        if (this->m_page_file_creation_listener != nullptr)
+        {
+            IfFailRet(this->m_page_file_creation_listener->on_page_file_created());
+        }
     }
-    fseek(this->m_file, 0, SEEK_END);
-    if (errno != 0)
+
+    if (fseek(this->m_file, 0, SEEK_END) == -1)
     {
         return result_t::file_io_error;
     }
-    this->m_num_pages = ftell(this->m_file);
-    return result_t::success;
+
+    this->m_num_pages = ftell(this->m_file) / PAGE_SIZE;
+    return result;
 }
 
 result_t page_file_impl::close()
 {
-    fclose(this->m_file);
-    if (errno != 0)
+    if (fclose(this->m_file) != 0)
     {
         return result_t::file_io_error;
     }
@@ -74,13 +78,11 @@ result_t page_file_impl::read_page(int page_number, void* buffer)
         return result_t::file_io_error;
     }
 
-    fseek(this->m_file, page_number * PAGE_SIZE, SEEK_SET);
-    if (errno != 0)
+    if (fseek(this->m_file, page_number * PAGE_SIZE, SEEK_SET) == -1)
     {
         return result_t::file_io_error;
     }
-    fread(buffer, PAGE_SIZE, 1, this->m_file);
-    if (errno != 0)
+    if (fread(buffer, PAGE_SIZE, 1, this->m_file) != 1)
     {
         return result_t::file_io_error;
     }
@@ -94,16 +96,16 @@ result_t page_file_impl::write_page(int page_number, void* buffer)
         return result_t::file_io_error;
     }
 
-    fseek(this->m_file, page_number * PAGE_SIZE, SEEK_SET);
-    if (errno != 0)
+    if (fseek(this->m_file, page_number * PAGE_SIZE, SEEK_SET) == -1)
     {
         return result_t::file_io_error;
     }
-    fwrite(buffer, PAGE_SIZE, 1, this->m_file);
-    if (errno != 0)
+
+    if (fwrite(buffer, PAGE_SIZE, 1, this->m_file) != 1)
     {
         return result_t::file_io_error;
     }
+
     return result_t::success;
 }
 
@@ -115,13 +117,11 @@ result_t page_file_impl::append_page(int* new_page_size)
     }
 
     uint8_t blank_page[PAGE_SIZE];
-    fseek(this->m_file, 0, SEEK_END);
-    if (errno != 0)
+    if (fseek(this->m_file, 0, SEEK_END) == -1)
     {
         return result_t::file_io_error;
     }
-    fwrite(blank_page, PAGE_SIZE, 1, this->m_file);
-    if (errno != 0)
+    if (fwrite(blank_page, PAGE_SIZE, 1, this->m_file) != 1)
     {
         return result_t::file_io_error;
     }
