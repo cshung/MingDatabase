@@ -23,6 +23,7 @@ private:
 class file_layer_listener
 {
 public:
-    virtual result_t on_file_layer_created() = 0;
-    virtual result_t on_file_layer_loaded() = 0;
+    virtual result_t on_after_file_created() = 0;
+    virtual result_t on_after_file_loaded() = 0;
+    virtual result_t on_before_file_closed() = 0;
 };

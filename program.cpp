@@ -22,6 +22,8 @@ result_t run()
         int new_page_number;
         IfFailRet(allocator.allocate_page(&new_page_number));
         IfFailRet(allocator.write_page(new_page_number, buffer));
+        IfFailRet(allocator.allocate_page(&new_page_number));
+        IfFailRet(allocator.deallocate_page(new_page_number));
         IfFailRet(allocator.close());
     }
     {

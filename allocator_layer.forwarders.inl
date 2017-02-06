@@ -27,3 +27,8 @@ result_t allocator_layer::allocate_page(int* new_page_number)
 {
     return this->m_impl->allocate_page(new_page_number);
 }
+
+result_t allocator_layer::deallocate_page(int page_number)
+{
+    return this->m_impl->deallocate_page(page_number);
+}

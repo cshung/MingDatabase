@@ -13,6 +13,7 @@ public:
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);
     result_t allocate_page(int* new_page_number);
+    result_t deallocate_page(int page_number);
     result_t close();
 private:
     allocator_layer_impl* m_impl;

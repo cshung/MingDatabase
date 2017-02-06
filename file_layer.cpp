@@ -50,7 +50,7 @@ result_t file_layer_impl::open(const char* file_name)
         this->m_num_pages = 0;
         if (this->m_file_layer_listener != nullptr)
         {
-            IfFailRet(this->m_file_layer_listener->on_file_layer_created());
+            IfFailRet(this->m_file_layer_listener->on_after_file_created());
         }
     }
     else
@@ -63,7 +63,7 @@ result_t file_layer_impl::open(const char* file_name)
         this->m_num_pages = ftell(this->m_file) / PAGE_SIZE;
         if (this->m_file_layer_listener != nullptr)
         {
-            IfFailRet(this->m_file_layer_listener->on_file_layer_loaded());
+            IfFailRet(this->m_file_layer_listener->on_after_file_loaded());
         }
     }
     return result;
@@ -71,6 +71,10 @@ result_t file_layer_impl::open(const char* file_name)
 
 result_t file_layer_impl::close()
 {
+    if (this->m_file_layer_listener != nullptr)
+    {
+        this->m_file_layer_listener->on_before_file_closed();
+    }
     if (fclose(this->m_file) != 0)
     {
         return result_t::file_io_error;

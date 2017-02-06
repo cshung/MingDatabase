@@ -15,9 +15,12 @@ public:
     result_t write_page(int page_number, void* buffer);
     result_t close();
     result_t allocate_page(int* new_page_number);
-    virtual result_t on_file_layer_created();
-    virtual result_t on_file_layer_loaded();
+    result_t deallocate_page(int page_number);
+    virtual result_t on_after_file_created();
+    virtual result_t on_after_file_loaded();
+    virtual result_t on_before_file_closed();
 private:
+    bool m_free_list_changed;
     result_t save_free_list();
     result_t load_free_list();
     file_layer* m_file_layer;
@@ -29,6 +32,7 @@ private:
 allocator_layer_impl::allocator_layer_impl()
 {
     this->m_file_layer = new file_layer();
+    this->m_free_list_changed = false;
 }
 
 result_t allocator_layer_impl::read_page(int page_number, void* buffer)
@@ -71,24 +75,47 @@ result_t allocator_layer_impl::allocate_page(int* new_page_number)
     return result;
 }
 
-result_t allocator_layer_impl::close()
+result_t allocator_layer_impl::deallocate_page(int page_number)
 {
-    return this->m_file_layer->close();
+    result_t result = result_t::success;
+    this->m_free_list_changed = true;
+    this->m_free_list.push_back(page_number);
+    return result;
 }
 
-result_t allocator_layer_impl::on_file_layer_created()
+result_t allocator_layer_impl::close()
 {
-    result_t result;
+    result_t result = result_t::success;
+    IfFailRet(this->m_file_layer->set_file_layer_listener(this));
+    IfFailRet(this->m_file_layer->close());
+    IfFailRet(this->m_file_layer->set_file_layer_listener(nullptr));
+    return result;
+}
+
+result_t allocator_layer_impl::on_after_file_created()
+{
+    result_t result = result_t::success;
     int new_page_number;
     IfFailRet(this->m_file_layer->append_page(&new_page_number));
     IfFailRet(this->save_free_list());
     return result;
 }
 
-result_t allocator_layer_impl::on_file_layer_loaded()
+result_t allocator_layer_impl::on_after_file_loaded()
 {
     return this->load_free_list();
 }
+
+result_t allocator_layer_impl::on_before_file_closed()
+{
+    result_t result = result_t::success;
+    if (this->m_free_list_changed)
+    {
+        IfFailRet(this->save_free_list());
+    }
+    return result;
+}
+
 
 result_t allocator_layer_impl::save_free_list()
 {
