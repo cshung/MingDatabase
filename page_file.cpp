@@ -16,11 +16,11 @@ public:
     result_t write_page(int page_number, void* buffer);
     result_t append_page(int* new_page_number);
     result_t close();
-    result_t set_page_file_creation_listener(page_file_creation_listener* page_file_creation_listener);
+    result_t set_page_file_listener(page_file_listener* page_file_listener);
 private:
     FILE* m_file;
     int m_num_pages;
-    page_file_creation_listener* m_page_file_creation_listener;
+    page_file_listener* m_page_file_listener;
 };
 
 #include "page_file.forwarders.inl"
@@ -28,7 +28,7 @@ private:
 page_file_impl::page_file_impl()
 {
     this->m_file = nullptr;
-    this->m_page_file_creation_listener = nullptr;
+    this->m_page_file_listener = nullptr;
 }
 
 page_file_impl::~page_file_impl()
@@ -48,9 +48,9 @@ result_t page_file_impl::open(const char* file_name)
         }
 
         this->m_num_pages = 0;
-        if (this->m_page_file_creation_listener != nullptr)
+        if (this->m_page_file_listener != nullptr)
         {
-            IfFailRet(this->m_page_file_creation_listener->on_page_file_created());
+            IfFailRet(this->m_page_file_listener->on_page_file_created());
         }
     }
     else
@@ -61,6 +61,10 @@ result_t page_file_impl::open(const char* file_name)
         }
 
         this->m_num_pages = ftell(this->m_file) / PAGE_SIZE;
+        if (this->m_page_file_listener != nullptr)
+        {
+            IfFailRet(this->m_page_file_listener->on_page_file_loaded());
+        }
     }
     return result;
 }
@@ -137,8 +141,8 @@ result_t page_file_impl::append_page(int* new_page_size)
     return result_t::success;
 }
 
-result_t page_file_impl::set_page_file_creation_listener(page_file_creation_listener* page_file_creation_listener)
+result_t page_file_impl::set_page_file_listener(page_file_listener* page_file_listener)
 {
-    this->m_page_file_creation_listener = page_file_creation_listener;
+    this->m_page_file_listener = page_file_listener;
     return result_t::success;
 }
