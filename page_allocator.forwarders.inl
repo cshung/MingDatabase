@@ -7,3 +7,9 @@ result_t page_allocator::read_page(int page_number, void* buffer)
 {
     return this->m_impl->read_page(page_number, buffer);
 }
+
+result_t page_allocator::write_page(int page_number, void* buffer)
+{
+    return this->m_impl->write_page(page_number, buffer);
+}
+
