@@ -12,24 +12,24 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    page_file file;
-    file.open("hello.db");
     uint8_t buffer[PAGE_SIZE];
     bool red = true;
-    if (red)
     {
-        page_allocator allocator(&file);
-        result_t result = allocator.read_page(0, buffer);
-        cout << result;
-        cout << (char*)buffer << endl;
-    }
-    else
-    {
+        page_file file;
+        file.open("hello.db");
         strcpy((char*)buffer, "World");
         int new_page_number = 0;
         file.append_page(&new_page_number);
         file.write_page(0, buffer);
+        file.close();
     }
-    file.close();
+    {
+        page_allocator allocator;
+        allocator.open("hello.db");
+        allocator.read_page(0, buffer);
+        cout << (char*)buffer << endl;
+        allocator.close();
+    }
+
     return 0;
 }
