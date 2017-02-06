@@ -17,6 +17,8 @@ result_t run()
     remove("hello.db");
     {
         allocator_layer allocator;
+        allocator.test();
+        return success;
         IfFailRet(allocator.open("hello.db"));
         strcpy((char*)buffer, "World");
         int new_page_number;

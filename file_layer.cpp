@@ -17,6 +17,7 @@ public:
     result_t append_page(int* new_page_number);
     result_t close();
     result_t set_file_layer_listener(file_layer_listener* file_layer_listener);
+    result_t get_num_pages(int* num_pages);
 private:
     FILE* m_file;
     int m_num_pages;
@@ -148,5 +149,16 @@ result_t file_layer_impl::append_page(int* new_page_size)
 result_t file_layer_impl::set_file_layer_listener(file_layer_listener* file_layer_listener)
 {
     this->m_file_layer_listener = file_layer_listener;
+    return result_t::success;
+}
+
+result_t file_layer_impl::get_num_pages(int* num_pages)
+{
+    if (num_pages == nullptr)
+    {
+        return result_t::invalid_argument;
+    }
+
+    *num_pages = this->m_num_pages;
     return result_t::success;
 }

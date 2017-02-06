@@ -38,3 +38,8 @@ result_t file_layer::set_file_layer_listener(file_layer_listener* file_layer_lis
 {
     return this->m_impl->set_file_layer_listener(file_layer_listener);
 }
+
+result_t file_layer::get_num_pages(int* num_pages)
+{
+    return this->m_impl->get_num_pages(num_pages);
+}
