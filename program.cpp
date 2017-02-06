@@ -6,6 +6,7 @@
 #include <cstring>
 
 using namespace std;
+#pragma warning(disable: 4996)
 
 // #define LOG
 

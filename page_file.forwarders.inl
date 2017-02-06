@@ -33,3 +33,8 @@ result_t page_file::close()
 {
     return this->m_impl->close();
 }
+
+result_t page_file::set_page_file_creation_listener(page_file_creation_listener* page_file_creation_listener)
+{
+    return this->m_impl->set_page_file_creation_listener(page_file_creation_listener);
+}

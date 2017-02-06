@@ -4,6 +4,9 @@
 #include <errno.h>
 #include <cstdint>
 
+// Stop bugging me with the secure versions of the APIs
+#pragma warning(disable: 4996)
+
 class page_file_impl
 {
 public:
@@ -14,15 +17,19 @@ public:
     result_t write_page(int page_number, void* buffer);
     result_t append_page(int* new_page_number);
     result_t close();
+    result_t set_page_file_creation_listener(page_file_creation_listener* page_file_creation_listener);
 private:
     FILE* m_file;
     int m_num_pages;
+    page_file_creation_listener* m_page_file_creation_listener;
 };
 
 #include "page_file.forwarders.inl"
 
 page_file_impl::page_file_impl()
 {
+    this->m_file = nullptr;
+    this->m_page_file_creation_listener = nullptr;
 }
 
 page_file_impl::~page_file_impl()
@@ -119,5 +126,11 @@ result_t page_file_impl::append_page(int* new_page_size)
         return result_t::file_io_error;
     }
     *new_page_size = this->m_num_pages++;
+    return result_t::success;
+}
+
+result_t page_file_impl::set_page_file_creation_listener(page_file_creation_listener* page_file_creation_listener)
+{
+    this->m_page_file_creation_listener = page_file_creation_listener;
     return result_t::success;
 }
