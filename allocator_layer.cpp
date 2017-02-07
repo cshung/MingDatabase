@@ -170,48 +170,64 @@ result_t allocator_layer_impl::compact()
 
     // Step 1: Find the first free segment
     int free_list_index = 0;
-    int free_start = this->m_free_list[free_list_index++];
-    int free_end = free_start + 1;
-    while (free_list_index < this->m_free_list.size())
+    int free_start = this->m_free_list[free_list_index];
+    
+    while (true)
     {
-        if (this->m_free_list[free_list_index] != free_end)
+        // At this point, we know where the free segment start, now search for where the free segment ends
+        int free_end = 0;
+        if (free_list_index == this->m_free_list.size())
         {
+            free_end = num_pages;
+        }
+        else
+        {
+            free_end = this->m_free_list[free_list_index++] + 1;
+            while (free_list_index < this->m_free_list.size())
+            {
+                if (this->m_free_list[free_list_index] != free_end)
+                {
+                    break;
+                }
+                else
+                {
+                    free_end++;
+                    free_list_index++;
+                }
+            }
+        }
+
+        // The free segment always end with a data (or end of list), so we search for the end of the data segment
+        // In case we have more free list items, the case is easy
+        // Otherwise we always ends at the file ends, in a special case, it could be the empty segment
+        int data_start = free_end;
+        int data_end;
+        if (free_list_index != this->m_free_list.size())
+        {
+            data_end = this->m_free_list[free_list_index];
+        }
+        else
+        {
+            data_end = num_pages;
+        }
+
+        printf("free [%d, %d)\n", free_start, free_end);
+        printf("data [%d, %d)\n", data_start, data_end);
+
+        if (data_start == data_end)
+        {
+            // Ideally, we can reclaim the space in the file as well (i.e. _chsize)
             break;
         }
         else
         {
-            free_end++;
-            free_list_index++;
-        }
-    }
-
-    // Step 2: Finding the first data segment
-    int data_start = free_end;
-    int data_end;
-    if (free_list_index != this->m_free_list.size())
-    {
-        data_end = this->m_free_list[free_list_index];
-    }
-    else
-    {
-        data_end = num_pages;
-    }
-
-    printf("free [%d, %d)\n", free_start, free_end);
-    printf("data [%d, %d)\n", data_start, data_end);
-
-    while (true)
-    {
-        // Inside this loop, we should always have a free segment, but we may not have a data segment
-        // That is possible if we have got (or already squeezed) the free segment to the very end of the file
-        // If that's the case, we can stop now
-        if (data_start == data_end)
-        {
-            // Ideally, we can reclaim the space in the file as well (i.e. _chsize)
-        }
-        else
-        {
-            // TODO: Move the data
+            int free_length = free_end - free_start;
+            int data_length = data_end - data_start;
+            for (int i = data_start; i < data_end; i++)
+            {
+                printf("Copying %d to %d\n", i, i - free_length);
+            }
+            free_start = free_start + data_length;
         }
     }
 
@@ -226,7 +242,8 @@ void allocator_layer::test()
 void allocator_layer_impl::test()
 {
     this->m_free_list.clear();
-    this->m_free_list.push_back(1);
-    this->m_free_list.push_back(3);
+    this->m_free_list.push_back(0);
+    this->m_free_list.push_back(2);
+    this->m_free_list.push_back(4);
     this->compact();
 }
