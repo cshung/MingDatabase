@@ -22,7 +22,7 @@ public:
     ~caching_layer_impl();
     result_t open(const char* file_name);
     result_t get_page(int page_number, void** buffer);
-    result_t mark_page_as_written(int page_number);
+    result_t put_page(int page_number, void** buffer, bool is_written);
     result_t allocate_page(int* new_page_number);
     result_t deallocate_page(int page_number);
     result_t close();
@@ -57,7 +57,7 @@ result_t caching_layer_impl::get_page(int page_number, void** buffer)
     return result_t::not_implemented;
 }
 
-result_t caching_layer_impl::mark_page_as_written(int page_number)
+result_t caching_layer_impl::put_page(int page_number, void** buffer, bool is_written)
 {
     return result_t::not_implemented;
 }
