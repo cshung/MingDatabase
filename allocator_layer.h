@@ -15,7 +15,6 @@ public:
     result_t allocate_page(int* new_page_number);
     result_t deallocate_page(int page_number);
     result_t close();
-    void test();
 private:
     allocator_layer_impl* m_impl;
 };

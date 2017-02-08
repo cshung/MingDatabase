@@ -203,13 +203,3 @@ result_t allocator_layer_impl::compact()
 
     return result;
 }
-
-void allocator_layer::test()
-{
-    this->m_impl->test();
-}
-
-void allocator_layer_impl::test()
-{
-    this->compact();
-}
