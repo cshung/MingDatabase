@@ -7,4 +7,5 @@ enum result_t
     success,
     invalid_argument,
     file_io_error,
+    not_implemented
 };

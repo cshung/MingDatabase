@@ -1,4 +1,5 @@
 #include "allocator_layer.h"
+#include "file_layer.h"
 #include "constant.h"
 #include <vector>
 #include <cstdint>
@@ -187,8 +188,8 @@ result_t allocator_layer_impl::compact()
         }
 
         uint8_t buffer[PAGE_SIZE];
-        IfFailRet(this->m_file_layer->read_page(this->m_free_list[free_slot_index_1], buffer));
-        IfFailRet(this->m_file_layer->write_page(data_slot_index, buffer));
+        IfFailRet(this->m_file_layer->read_page((int)this->m_free_list[free_slot_index_1], buffer));
+        IfFailRet(this->m_file_layer->write_page((int)data_slot_index, buffer));
 
         free_slot_index_1++;
         data_slot_index++;
@@ -198,7 +199,7 @@ result_t allocator_layer_impl::compact()
     this->m_free_list.clear();
     for (size_t i = num_data; i < num_pages; i++)
     {
-        this->m_free_list.push_back(i);
+        this->m_free_list.push_back((int)i);
     }
 
     return result;

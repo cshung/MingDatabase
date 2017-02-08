@@ -24,6 +24,9 @@
     <ClCompile Include="allocator_layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="caching_layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constant.h">
@@ -38,12 +41,18 @@
     <ClInclude Include="allocator_layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="caching_layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="file_layer.forwarders.inl">
       <Filter>Header Files</Filter>
     </None>
     <None Include="allocator_layer.forwarders.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="caching_layer.forwarders.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
