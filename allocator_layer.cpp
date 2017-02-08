@@ -23,8 +23,6 @@ public:
     virtual result_t on_after_file_created();
     virtual result_t on_after_file_loaded();
     virtual result_t on_before_file_closed();
-
-    void test();
 private:
     bool m_free_list_changed;
     result_t save_free_list();
