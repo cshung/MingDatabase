@@ -161,74 +161,44 @@ result_t allocator_layer_impl::load_free_list()
 result_t allocator_layer_impl::compact()
 {
     result_t result = result_t::success;
+    assert(this->m_free_list.size() > 0);
+
     sort(this->m_free_list.begin(), this->m_free_list.end());
     int num_pages;
     IfFailRet(this->m_file_layer->get_num_pages(&num_pages));
 
-    // Debugging
-    num_pages = 5;
+    size_t num_data = num_pages - this->m_free_list.size();
 
-    // Step 1: Find the first free segment
-    int free_list_index = 0;
-    int free_start = this->m_free_list[free_list_index];
-    
-    while (true)
+    size_t free_slot_index_1 = 0;
+    size_t free_slot_index_2 = 0;
+    while ((free_slot_index_2 < this->m_free_list.size()) && (this->m_free_list[free_slot_index_2] < num_data))
     {
-        // At this point, we know where the free segment start, now search for where the free segment ends
-        int free_end = 0;
-        if (free_list_index == this->m_free_list.size())
+        free_slot_index_2++;
+    }
+
+    size_t data_slot_index = num_data;
+
+    while ((free_slot_index_1 < this->m_free_list.size()) && (this->m_free_list[free_slot_index_1] < num_data))
+    {
+        while ((free_slot_index_2 < this->m_free_list.size()) && (this->m_free_list[free_slot_index_2] == data_slot_index))
         {
-            free_end = num_pages;
-        }
-        else
-        {
-            free_end = this->m_free_list[free_list_index++] + 1;
-            while (free_list_index < this->m_free_list.size())
-            {
-                if (this->m_free_list[free_list_index] != free_end)
-                {
-                    break;
-                }
-                else
-                {
-                    free_end++;
-                    free_list_index++;
-                }
-            }
+            free_slot_index_2++;
+            data_slot_index++;
         }
 
-        // The free segment always end with a data (or end of list), so we search for the end of the data segment
-        // In case we have more free list items, the case is easy
-        // Otherwise we always ends at the file ends, in a special case, it could be the empty segment
-        int data_start = free_end;
-        int data_end;
-        if (free_list_index != this->m_free_list.size())
-        {
-            data_end = this->m_free_list[free_list_index];
-        }
-        else
-        {
-            data_end = num_pages;
-        }
+        uint8_t buffer[PAGE_SIZE];
+        IfFailRet(this->m_file_layer->read_page(this->m_free_list[free_slot_index_1], buffer));
+        IfFailRet(this->m_file_layer->write_page(data_slot_index, buffer));
 
-        printf("free [%d, %d)\n", free_start, free_end);
-        printf("data [%d, %d)\n", data_start, data_end);
+        free_slot_index_1++;
+        data_slot_index++;
+    }
 
-        if (data_start == data_end)
-        {
-            // Ideally, we can reclaim the space in the file as well (i.e. _chsize)
-            break;
-        }
-        else
-        {
-            int free_length = free_end - free_start;
-            int data_length = data_end - data_start;
-            for (int i = data_start; i < data_end; i++)
-            {
-                printf("Copying %d to %d\n", i, i - free_length);
-            }
-            free_start = free_start + data_length;
-        }
+    // TODO: Consider shrinking the file size
+    this->m_free_list.clear();
+    for (size_t i = num_data; i < num_pages; i++)
+    {
+        this->m_free_list.push_back(i);
     }
 
     return result;
@@ -241,9 +211,5 @@ void allocator_layer::test()
 
 void allocator_layer_impl::test()
 {
-    this->m_free_list.clear();
-    this->m_free_list.push_back(0);
-    this->m_free_list.push_back(2);
-    this->m_free_list.push_back(4);
     this->compact();
 }
