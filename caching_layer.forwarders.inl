@@ -18,9 +18,9 @@ result_t caching_layer::get_page(int page_number, void** buffer)
     return this->m_impl->get_page(page_number, buffer);
 }
 
-result_t caching_layer::put_page(int page_number, void** buffer, bool is_written)
+result_t caching_layer::set_page_as_written(int page_number)
 {
-    return this->m_impl->put_page(page_number, buffer, is_written);
+    return this->m_impl->set_page_as_written(page_number);
 }
 
 result_t caching_layer::allocate_page(int* new_page_number)

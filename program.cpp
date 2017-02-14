@@ -2,6 +2,7 @@
 #include "constant.h"
 #include "file_layer.h"
 #include "allocator_layer.h"
+#include "caching_layer.h"
 #include <cstdint>
 #include <cstring>
 
@@ -12,26 +13,27 @@ using namespace std;
 
 result_t run()
 {
-    uint8_t buffer[PAGE_SIZE];
+    void* buffer;
     result_t result = success;
     remove("hello.db");
     {
-        allocator_layer allocator;
-        IfFailRet(allocator.open("hello.db"));
-        strcpy((char*)buffer, "World");
+        caching_layer caching_layer;
+        IfFailRet(caching_layer.open("hello.db"));
         int new_page_number;
-        IfFailRet(allocator.allocate_page(&new_page_number));
-        IfFailRet(allocator.write_page(new_page_number, buffer));
-        IfFailRet(allocator.allocate_page(&new_page_number));
-        IfFailRet(allocator.deallocate_page(new_page_number));
-        IfFailRet(allocator.close());
+        IfFailRet(caching_layer.allocate_page(&new_page_number));
+        IfFailRet(caching_layer.get_page(new_page_number, &buffer));
+        strcpy((char*)buffer, "World");
+        IfFailRet(caching_layer.set_page_as_written(new_page_number));
+        IfFailRet(caching_layer.allocate_page(&new_page_number));
+        IfFailRet(caching_layer.deallocate_page(new_page_number));
+        IfFailRet(caching_layer.close());
     }
     {
-        allocator_layer allocator;
-        IfFailRet(allocator.open("hello.db"));
-        IfFailRet(allocator.read_page(1, buffer));
+        caching_layer caching_layer;
+        IfFailRet(caching_layer.open("hello.db"));
+        IfFailRet(caching_layer.get_page(1, &buffer));
         cout << (char*)buffer << endl;
-        IfFailRet(allocator.close());
+        IfFailRet(caching_layer.close());
     }
 
     return result;
