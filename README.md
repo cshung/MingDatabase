@@ -24,7 +24,7 @@ The allocation layer is responsible for handling allocation/deallocation request
 # Caching layer
 The caching layer is responsible for caching the pages so that repeated access do not hit the disk. It **owns** the memory buffers, and it is also responsible for making sure changed pages will eventually be written to disk.
 
-**Status**: Designed - with some scaffolding/incomplete implementation.
+**Status**: Implemented - it should just work - the cache size is set to very small just for testing purpose.
 
 # Btree
 Btree should work on top of the caching layer - it assign meaning to the pages (except the 0th), it grows from both ends to store keys and (value/children). The code is data_structure is a model for this, most complications related to implementing this as a file should already be solved by it.
