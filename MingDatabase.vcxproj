@@ -143,11 +143,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="allocator_layer.cpp" />
+    <ClCompile Include="btree.cpp" />
     <ClCompile Include="caching_layer.cpp" />
     <ClCompile Include="file_layer.cpp" />
     <ClCompile Include="program.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="btree.h" />
     <ClInclude Include="caching_layer.h" />
     <ClInclude Include="constant.h" />
     <ClInclude Include="allocator_layer.h" />
@@ -156,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="allocator_layer.forwarders.inl" />
+    <None Include="btree.forwarders.inl" />
     <None Include="caching_layer.forwarders.inl" />
     <None Include="file_layer.forwarders.inl" />
   </ItemGroup>
