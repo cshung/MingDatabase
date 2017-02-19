@@ -11,9 +11,8 @@ private:
     int m_root;
 };
 
-#include "btree.node.declaration.inl"
-
 #include "btree.forwarders.inl"
+#include "btree.node.declaration.inl"
 
 struct page_header
 {
@@ -44,7 +43,6 @@ result_t btree_impl::insert(buffer key, buffer value)
 
     IfFailRet(btree_node::create_btree_node(this->m_cache, this->m_root, &root_node));
 
-    // TOOD: Call insert on the node
     delete root_node;
 
     return result;
@@ -53,6 +51,3 @@ result_t btree_impl::insert(buffer key, buffer value)
 #include "btree.node.impl.inl"
 #include "btree.internal.node.impl.inl"
 #include "btree.leaf.node.impl.inl"
-
-
-
