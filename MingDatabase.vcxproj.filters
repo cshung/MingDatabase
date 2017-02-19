@@ -64,5 +64,17 @@
     <None Include="btree.forwarders.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="btree.node.declaration.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="btree.node.impl.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="btree.leaf.node.impl.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="btree.internal.node.impl.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

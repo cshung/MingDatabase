@@ -159,6 +159,10 @@
   <ItemGroup>
     <None Include="allocator_layer.forwarders.inl" />
     <None Include="btree.forwarders.inl" />
+    <None Include="btree.internal.node.impl.inl" />
+    <None Include="btree.leaf.node.impl.inl" />
+    <None Include="btree.node.declaration.inl" />
+    <None Include="btree.node.impl.inl" />
     <None Include="caching_layer.forwarders.inl" />
     <None Include="file_layer.forwarders.inl" />
   </ItemGroup>
