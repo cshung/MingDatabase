@@ -42,7 +42,9 @@ result_t btree_impl::insert(buffer key, buffer value)
     btree_node* root_node;
 
     IfFailRet(btree_node::create_btree_node(this->m_cache, this->m_root, &root_node));
+    insert_result this_insert_result;
 
+    root_node->insert(key, value, &this_insert_result);
     delete root_node;
 
     return result;

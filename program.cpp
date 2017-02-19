@@ -20,6 +20,19 @@ result_t run()
         caching_layer caching_layer;
         IfFailRet(caching_layer.open("hello.db"));
         btree tree(&caching_layer);
+
+        const char* key = "hello";
+        const char* val = "world";
+        buffer key_buffer;
+        key_buffer.data = (void*)key;
+        key_buffer.size = 5;
+
+        buffer val_buffer;
+        val_buffer.data = (void*)val;
+        val_buffer.size = 5;
+
+        tree.insert(key_buffer, val_buffer);
+
         caching_layer.close();
     }
 
