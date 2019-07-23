@@ -1,5 +1,3 @@
-#pragma once
-
 #include "caching_layer.h"
 #include "allocator_layer.h"
 #include "constant.h"
