@@ -174,38 +174,45 @@ result_t allocator_layer_impl::compact()
     int num_pages;
     IfFailRet(this->m_file_layer->get_num_pages(&num_pages));
 
-    // Let say we have 10 pages, and 2 pages are free, num_data is 8 (i.e. number of useful pages)
+    // The end state of the file should have [0, num_data) pages
     size_t num_data = num_pages - this->m_free_list.size();
 
-    size_t free_slot_index_1 = 0;
-    size_t free_slot_index_2 = 0;
-    while ((free_slot_index_2 < this->m_free_list.size()) && (this->m_free_list[free_slot_index_2] < num_data))
+    // To do so, we want to walk two pointers and fill the holes
+    // On one hand, we want to walk the free slots before num_data (this is free_list_index_1)
+    // On the other hand, we want to walk the data slots on or after num_data (this is data_slot)
+    // The problem is that we do not know which slot after num_data is free, so we walk the free list
+    // until we reach after num_data and skip them as we see them. 
+    // The upcoming free slot after num_data is stored as free_list_index_2
+
+    size_t free_list_index_1 = 0;
+    size_t data_slot = num_data;
+    size_t free_list_index_2 = 0;
+    while ((free_list_index_2 < this->m_free_list.size()) && (this->m_free_list[free_list_index_2] < num_data))
     {
-        free_slot_index_2++;
+        free_list_index_2++;
     }
-    // At this point, free_slot_index_2 is either a slot correspond to the last free page before num_data or invalid
 
-    size_t data_slot_index = num_data;
-
-    while ((free_slot_index_1 < this->m_free_list.size()) && (this->m_free_list[free_slot_index_1] < num_data))
+    while ((free_list_index_1 < this->m_free_list.size()) && (this->m_free_list[free_list_index_1] < num_data))
     {
-        while ((free_slot_index_2 < this->m_free_list.size()) && (this->m_free_list[free_slot_index_2] == data_slot_index))
+        while ((free_list_index_2 < this->m_free_list.size()) && (this->m_free_list[free_list_index_2] == data_slot))
         {
-            free_slot_index_2++;
-            data_slot_index++;
+            free_list_index_2++;
+            data_slot++;
         }
 
-        // I don't get this, why are we writing to free list data to data slot ??
         uint8_t buffer[PAGE_SIZE];
-        IfFailRet(this->m_file_layer->read_page((int)this->m_free_list[free_slot_index_1], buffer));
-        IfFailRet(this->m_file_layer->write_page((int)data_slot_index, buffer));
+        IfFailRet(this->m_file_layer->read_page((int)data_slot, buffer));
+        IfFailRet(this->m_file_layer->write_page((int)this->m_free_list[free_list_index_1], buffer));
 
-        free_slot_index_1++;
-        data_slot_index++;
+        free_list_index_1++;
+        data_slot++;
     }
 
-    // TODO: Consider shrinking the file size
+    assert(data_slot == num_pages);
     this->m_free_list.clear();
+
+    // TODO - shrink the file - so that we actually compact
+    // Unfortunately, it looks like actually truncate a file has to be platform specific ??
     for (size_t i = num_data; i < num_pages; i++)
     {
         this->m_free_list.push_back((int)i);
