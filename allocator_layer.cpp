@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cassert>
 #include <algorithm>
+#include <string.h>
 
 #include <stdio.h>
 
