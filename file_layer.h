@@ -5,11 +5,25 @@
 class file_layer_impl;
 class file_layer_listener;
 
+/**
+ * This class represents the interface of the file layer.
+ */
 class file_layer
 {
 public:
+    /**
+     * Construct an instance of the file layer.
+     */
     file_layer();
+    /**
+     * Destruct an instance of the file layer.
+     */
     ~file_layer();
+    /**
+     * Open a file.
+     * @param file_name The name of the file.
+     * @return result_t::success if the file can be opened.
+     */
     result_t open(const char* file_name);
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);
