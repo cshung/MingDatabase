@@ -14,6 +14,8 @@ public:
     result_t set_page_as_written(int page_number);
     result_t allocate_page(int* new_page_number);
     result_t deallocate_page(int page_number);
+    result_t get_root(int* root);
+    result_t set_root(int root);
     result_t close();
 private:
     caching_layer_impl* m_impl;

@@ -33,6 +33,16 @@ result_t caching_layer::deallocate_page(int page_number)
     return this->m_impl->deallocate_page(page_number);
 }
 
+result_t caching_layer::get_root(int* root)
+{
+    return this->m_impl->get_root(root);
+}
+
+result_t caching_layer::set_root(int root)
+{
+    return this->m_impl->set_root(root);
+}
+
 result_t caching_layer::close()
 {
     return this->m_impl->close();

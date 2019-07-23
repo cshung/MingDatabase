@@ -19,9 +19,11 @@ public:
     result_t open(const char* file_name);
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);
-    result_t close();
+    result_t get_root(int* root);
+    result_t set_root(int root);
     result_t allocate_page(int* new_page_number);
     result_t deallocate_page(int page_number);
+    result_t close();
     virtual result_t on_after_file_created();
     virtual result_t on_after_file_loaded();
     virtual result_t on_before_file_closed();
@@ -31,6 +33,7 @@ private:
     result_t load_free_list();
     result_t compact();
     file_layer* m_file_layer;
+    uint32_t m_root;
     vector<uint32_t> m_free_list;
 };
 
@@ -39,6 +42,7 @@ private:
 allocator_layer_impl::allocator_layer_impl()
 {
     this->m_file_layer = new file_layer();
+    this->m_root = 0;
     this->m_free_list_changed = false;
 }
 
@@ -63,6 +67,21 @@ result_t allocator_layer_impl::open(const char* file_name)
     IfFailRet(this->m_file_layer->set_file_layer_listener(this));
     IfFailRet(this->m_file_layer->open(file_name));
     IfFailRet(this->m_file_layer->set_file_layer_listener(nullptr));
+    return result;
+}
+
+result_t allocator_layer_impl::get_root(int* root)
+{
+    result_t result = result_t::success;
+    IfFalseRet(root != nullptr, result_t::invalid_argument);
+    *root = this->m_root;
+    return result;
+}
+
+result_t allocator_layer_impl::set_root(int root)
+{
+    result_t result = result_t::success;
+    this->m_root = root;
     return result;
 }
 
@@ -138,13 +157,13 @@ result_t allocator_layer_impl::on_before_file_closed()
 result_t allocator_layer_impl::save_free_list()
 {
     result_t result = result_t::success;
-    uint8_t allocation_page[PAGE_SIZE];
+    uint32_t allocation_page[PAGE_SIZE/sizeof(uint32_t)];
     assert(this->m_free_list.size() < 256);
-    allocation_page[0] = (uint8_t)this->m_free_list.size();
+    allocation_page[0] = this->m_root;
+    allocation_page[1] = this->m_free_list.size();
     for (size_t i = 0; i < this->m_free_list.size(); i++)
     {
-        uint32_t free_page = this->m_free_list[i];
-        memcpy(allocation_page + 1 + i * 4, &free_page, 4);
+        allocation_page[i + 2] = this->m_free_list[i];        
     }
     IfFailRet(this->m_file_layer->write_page(0, allocation_page));
     return result;
@@ -153,14 +172,13 @@ result_t allocator_layer_impl::save_free_list()
 result_t allocator_layer_impl::load_free_list()
 {
     result_t result = result_t::success;
-    uint8_t allocation_page[PAGE_SIZE];
+    uint32_t allocation_page[PAGE_SIZE / sizeof(uint32_t)];
     IfFailRet(this->m_file_layer->read_page(0, allocation_page));
-    int num_free_page = allocation_page[0];
+    this->m_root = allocation_page[0];
+    int num_free_page = allocation_page[1];
     for (int i = 0; i < num_free_page; i++)
     {
-        uint32_t free_page;
-        memcpy(&free_page, allocation_page + 1 + i * 4, 4);
-        this->m_free_list.push_back(free_page);
+        this->m_free_list.push_back(allocation_page[i + 2]);
     }
     return result;
 }

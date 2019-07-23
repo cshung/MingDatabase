@@ -5,8 +5,8 @@
 
 struct buffer
 {
-    void* data;
     int size;
+    void* data;
 };
 
 class btree_impl;
@@ -15,7 +15,9 @@ class btree
 {
 public:
     btree(caching_layer* cache);
+    result_t initialize();
     result_t insert(buffer key, buffer value);
+    result_t close();
 private:
     btree_impl* m_impl;
 };

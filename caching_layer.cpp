@@ -25,6 +25,8 @@ public:
     result_t set_page_as_written(int page_number);
     result_t allocate_page(int* new_page_number);
     result_t deallocate_page(int page_number);
+    result_t get_root(int* root);
+    result_t set_root(int root);
     result_t close();
 private:
     allocator_layer* m_allocator_layer;
@@ -72,7 +74,7 @@ result_t caching_layer_impl::get_page(int page_number, void** buffer)
 
             if (node->m_is_dirty)
             {
-                this->m_allocator_layer->write_page(node->m_page_number, node->m_buffer);
+                IfFailRet(this->m_allocator_layer->write_page(node->m_page_number, node->m_buffer));
                 node->m_is_dirty = false;
             }
 
@@ -117,7 +119,7 @@ result_t caching_layer_impl::set_page_as_written(int page_number)
         probe->second->m_is_dirty = true;
     }
 
-    return result_t::success;
+    return result;
 }
 
 result_t caching_layer_impl::allocate_page(int* new_page_number)
@@ -130,17 +132,30 @@ result_t caching_layer_impl::deallocate_page(int page_number)
     return this->m_allocator_layer->deallocate_page(page_number);
 }
 
+
+result_t caching_layer_impl::get_root(int* root)
+{
+    return this->m_allocator_layer->get_root(root);
+}
+
+result_t caching_layer_impl::set_root(int root)
+{
+    return this->m_allocator_layer->set_root(root);
+}
+
 result_t caching_layer_impl::close()
 {
+    result_t result = result_t::success;
     for (cache_node* p = this->m_front.m_next; p != &this->m_back; p = p->m_next)
     {
         if (p->m_is_dirty)
         {
-            this->m_allocator_layer->write_page(p->m_page_number, p->m_buffer);
+            IfFailRet(this->m_allocator_layer->write_page(p->m_page_number, p->m_buffer));
         }
     }
 
-    return this->m_allocator_layer->close();
+    IfFailRet(this->m_allocator_layer->close());
+    return result;
 }
 
 cache_node::cache_node()

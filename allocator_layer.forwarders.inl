@@ -23,6 +23,16 @@ result_t allocator_layer::write_page(int page_number, void* buffer)
     return this->m_impl->write_page(page_number, buffer);
 }
 
+result_t allocator_layer::get_root(int* root)
+{
+    return this->m_impl->get_root(root);
+}
+
+result_t allocator_layer::set_root(int root)
+{
+    return this->m_impl->set_root(root);
+}
+
 result_t allocator_layer::close()
 {
     return this->m_impl->close();

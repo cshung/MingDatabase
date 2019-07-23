@@ -15,7 +15,6 @@ using namespace std;
 result_t run()
 {
     result_t result = success;
-    /*
     remove("hello.db");
     {
         // A unit test for the compaction algorithm
@@ -45,12 +44,17 @@ result_t run()
         IfFailRet(allocator_layer.deallocate_page(9));
         IfFailRet(allocator_layer.close());
     }
-    */
+    {
+        allocator_layer allocator_layer;
+        IfFailRet(allocator_layer.open("hello.db"));
+        IfFailRet(allocator_layer.close());
+    }
     remove("hello.db");
     {
         caching_layer caching_layer;
         IfFailRet(caching_layer.open("hello.db"));
         btree tree(&caching_layer);
+        IfFailRet(tree.initialize());
 
         const char* key = "hello";
         const char* val = "world";
@@ -64,7 +68,7 @@ result_t run()
 
         tree.insert(key_buffer, val_buffer);
 
-        caching_layer.close();
+        tree.close();
     }
 
     return result;

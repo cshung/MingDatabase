@@ -5,51 +5,51 @@ class btree_impl
 {
 public:
     btree_impl(caching_layer* caching_layer);
+    result_t initialize();
     result_t insert(buffer key, buffer value);
+    result_t close();
 private:
     caching_layer* m_cache;
     int m_root;
 };
 
 #include "btree.forwarders.inl"
-#include "btree.node.declaration.inl"
 
-struct page_header
+struct node_header
 {
     bool is_leaf;
-    int begin;
-    int end;
+    int num_keys;
 };
 
 btree_impl::btree_impl(caching_layer* cache)
 {
     this->m_cache = cache;
+}
 
-    // Creating an empty leaf page
-    this->m_cache->allocate_page(&this->m_root);
-    void* buffer;
-    this->m_cache->get_page(this->m_root, &buffer);
-    page_header* header = (page_header*)buffer;
-    header->is_leaf = true;
-    header->begin = sizeof(page_header);
-    header->end = PAGE_SIZE;
-    this->m_cache->set_page_as_written(this->m_root);
+result_t btree_impl::initialize()
+{
+    result_t result = result_t::success;
+    IfFailRet(this->m_cache->get_root(&this->m_root));
+    if (this->m_root == 0)
+    {
+        IfFailRet(this->m_cache->allocate_page(&this->m_root));
+        node_header* root_node;
+        IfFailRet(this->m_cache->get_page(this->m_root, (void**)&root_node));
+        root_node->is_leaf = true;
+        root_node->num_keys = 0;
+        this->m_cache->set_page_as_written(this->m_root);
+    }
 }
 
 result_t btree_impl::insert(buffer key, buffer value)
 {
     result_t result = result_t::success;
-    btree_node* root_node;
 
-    IfFailRet(btree_node::create_btree_node(this->m_cache, this->m_root, &root_node));
-    insert_result this_insert_result;
-
-    root_node->insert(key, value, &this_insert_result);
-    delete root_node;
-
+    // TODO: Implementation
     return result;
 }
 
-#include "btree.node.impl.inl"
-#include "btree.internal.node.impl.inl"
-#include "btree.leaf.node.impl.inl"
+result_t btree_impl::close()
+{
+    return this->m_cache->close();
+}
