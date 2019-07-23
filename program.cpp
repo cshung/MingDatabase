@@ -15,6 +15,37 @@ using namespace std;
 result_t run()
 {
     result_t result = success;
+    /*
+    remove("hello.db");
+    {
+        // A unit test for the compaction algorithm
+        // Page 1 - 10 is allocated, page 1,3,5,7,9 are deallocated,
+        // The free list accumulates to 5 pages and start compacting
+        // It results in page 6 copied into page 1
+        // It results in page 8 copied into page 3
+        // It results in page 10 copied into page 5
+        // And we are done
+        allocator_layer allocator_layer;
+        int page_number;
+        IfFailRet(allocator_layer.open("hello.db"));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.allocate_page(&page_number));
+        IfFailRet(allocator_layer.deallocate_page(1));
+        IfFailRet(allocator_layer.deallocate_page(3));
+        IfFailRet(allocator_layer.deallocate_page(5));
+        IfFailRet(allocator_layer.deallocate_page(7));
+        IfFailRet(allocator_layer.deallocate_page(9));
+        IfFailRet(allocator_layer.close());
+    }
+    */
     remove("hello.db");
     {
         caching_layer caching_layer;

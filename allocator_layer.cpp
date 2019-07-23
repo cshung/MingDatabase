@@ -93,7 +93,7 @@ result_t allocator_layer_impl::deallocate_page(int page_number)
     result_t result = result_t::success;
     this->m_free_list_changed = true;
     this->m_free_list.push_back(page_number);
-    if (this->m_free_list.size() > 5)
+    if (this->m_free_list.size() >= 5)
     {
         IfFailRet(this->compact());
     }
@@ -174,25 +174,25 @@ result_t allocator_layer_impl::compact()
     int num_pages;
     IfFailRet(this->m_file_layer->get_num_pages(&num_pages));
 
-    // The end state of the file should have [0, num_data) pages
-    size_t num_data = num_pages - this->m_free_list.size();
+    // The end state of the file should have [1, data_end) pages
+    size_t data_end = num_pages - this->m_free_list.size();
 
     // To do so, we want to walk two pointers and fill the holes
-    // On one hand, we want to walk the free slots before num_data (this is free_list_index_1)
-    // On the other hand, we want to walk the data slots on or after num_data (this is data_slot)
-    // The problem is that we do not know which slot after num_data is free, so we walk the free list
-    // until we reach after num_data and skip them as we see them. 
-    // The upcoming free slot after num_data is stored as free_list_index_2
+    // On one hand, we want to walk the free slots before data_end (this is free_list_index_1)
+    // On the other hand, we want to walk the data slots on or after data_end (this is data_slot)
+    // The problem is that we do not know which slot after data_end is free, so we walk the free list
+    // until we reach after data_end and skip them as we see them. 
+    // The upcoming free slot after data_end is stored as free_list_index_2
 
     size_t free_list_index_1 = 0;
-    size_t data_slot = num_data;
+    size_t data_slot = data_end;
     size_t free_list_index_2 = 0;
-    while ((free_list_index_2 < this->m_free_list.size()) && (this->m_free_list[free_list_index_2] < num_data))
+    while ((free_list_index_2 < this->m_free_list.size()) && (this->m_free_list[free_list_index_2] < data_end))
     {
         free_list_index_2++;
     }
 
-    while ((free_list_index_1 < this->m_free_list.size()) && (this->m_free_list[free_list_index_1] < num_data))
+    while ((free_list_index_1 < this->m_free_list.size()) && (this->m_free_list[free_list_index_1] < data_end))
     {
         while ((free_list_index_2 < this->m_free_list.size()) && (this->m_free_list[free_list_index_2] == data_slot))
         {
@@ -200,6 +200,8 @@ result_t allocator_layer_impl::compact()
             data_slot++;
         }
 
+        // TODO, is it possible to postpone the file I/O operation required for compacting?
+        // TODO, if the page number is referenced, we need to make sure the reference is updated as well.
         uint8_t buffer[PAGE_SIZE];
         IfFailRet(this->m_file_layer->read_page((int)data_slot, buffer));
         IfFailRet(this->m_file_layer->write_page((int)this->m_free_list[free_list_index_1], buffer));
@@ -213,7 +215,7 @@ result_t allocator_layer_impl::compact()
 
     // TODO - shrink the file - so that we actually compact
     // Unfortunately, it looks like actually truncate a file has to be platform specific ??
-    for (size_t i = num_data; i < num_pages; i++)
+    for (size_t i = data_end; i < num_pages; i++)
     {
         this->m_free_list.push_back((int)i);
     }
