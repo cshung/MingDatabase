@@ -3,6 +3,11 @@ allocator_layer::allocator_layer()
     this->m_impl = new allocator_layer_impl();
 }
 
+allocator_layer::~allocator_layer()
+{
+    delete this->m_impl;
+}
+
 result_t allocator_layer::open(const char* file_name)
 {
     return this->m_impl->open(file_name);

@@ -4,10 +4,14 @@
 
 class allocator_layer_impl;
 
+/**
+ * This class represents the interface of the allocator layer.
+ */
 class allocator_layer
 {
 public:
     allocator_layer();
+    ~allocator_layer();
     result_t open(const char* file_name);
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);

@@ -15,6 +15,7 @@ class allocator_layer_impl : file_layer_listener
 {
 public:
     allocator_layer_impl();
+    ~allocator_layer_impl();
     result_t open(const char* file_name);
     result_t read_page(int page_number, void* buffer);
     result_t write_page(int page_number, void* buffer);
@@ -39,6 +40,11 @@ allocator_layer_impl::allocator_layer_impl()
 {
     this->m_file_layer = new file_layer();
     this->m_free_list_changed = false;
+}
+
+allocator_layer_impl::~allocator_layer_impl()
+{
+    delete this->m_file_layer;
 }
 
 result_t allocator_layer_impl::read_page(int page_number, void* buffer)
@@ -71,6 +77,7 @@ result_t allocator_layer_impl::allocate_page(int* new_page_number)
     if (this->m_free_list.size() > 0)
     {
         *new_page_number = this->m_free_list.back();
+        this->m_free_list_changed = true;
         this->m_free_list.pop_back();
     }
     else
@@ -167,6 +174,7 @@ result_t allocator_layer_impl::compact()
     int num_pages;
     IfFailRet(this->m_file_layer->get_num_pages(&num_pages));
 
+    // Let say we have 10 pages, and 2 pages are free, num_data is 8 (i.e. number of useful pages)
     size_t num_data = num_pages - this->m_free_list.size();
 
     size_t free_slot_index_1 = 0;
@@ -175,6 +183,7 @@ result_t allocator_layer_impl::compact()
     {
         free_slot_index_2++;
     }
+    // At this point, free_slot_index_2 is either a slot correspond to the last free page before num_data or invalid
 
     size_t data_slot_index = num_data;
 
@@ -186,6 +195,7 @@ result_t allocator_layer_impl::compact()
             data_slot_index++;
         }
 
+        // I don't get this, why are we writing to free list data to data slot ??
         uint8_t buffer[PAGE_SIZE];
         IfFailRet(this->m_file_layer->read_page((int)this->m_free_list[free_slot_index_1], buffer));
         IfFailRet(this->m_file_layer->write_page((int)data_slot_index, buffer));
