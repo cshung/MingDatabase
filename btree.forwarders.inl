@@ -1,8 +1,8 @@
 #pragma once
 
-btree::btree(caching_layer* cache)
+btree::btree(caching_layer* caching_layer, int root)
 {
-    this->m_impl = new btree_impl(cache);
+    this->m_impl = new btree_impl(caching_layer, root);
 }
 
 result_t btree::initialize()
