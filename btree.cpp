@@ -9,14 +9,23 @@ public:
     result_t insert(buffer key, buffer value);
 private:
     result_t insert(int node, buffer key, buffer value);
-    result_t leaf_insert(void* node_memory, buffer key, buffer value);
-    result_t internal_insert(void* node_memory, buffer key, buffer value);
+    result_t leaf_insert(uint8_t* node_memory, buffer key, buffer value);
+    result_t internal_insert(uint8_t* node_memory, buffer key, buffer value);
+    result_t get_key(uint8_t* node_memory, int index, buffer* key);
     caching_layer* m_caching_layer;
     comparator* m_comparator;
     int m_root;
 };
 
 #include "btree.forwarders.inl"
+
+// The layout of a node page is as follow:
+// It starts with a node_header that tell if it is a leaf node or an internal node.
+// For a leaf node, we need to store the keys and the values.
+// They are packed sequentially with a 2 byte length prefix following the payload immediately
+// This layout does not allow random access, and therefore we have another index.
+// For each key, it's offset from the beginning of the page is stored as an array.
+// The array started at the end of the page and run backwards.
 
 struct node_header
 {
@@ -26,6 +35,8 @@ struct node_header
 
 btree_impl::btree_impl(caching_layer* caching_layer, comparator* comparator, int root)
 {
+    assert(caching_layer != nullptr);
+    assert(comparator != nullptr);
     this->m_caching_layer = caching_layer;
     this->m_comparator = comparator;
     this->m_root = root;
@@ -56,8 +67,8 @@ result_t btree_impl::insert(buffer key, buffer value)
 result_t btree_impl::insert(int node, buffer key, buffer value)
 {
     result_t result = result_t::success;
-    void* node_memory;
-    IfFailRet(this->m_caching_layer->get_page(node, &node_memory));
+    uint8_t* node_memory;
+    IfFailRet(this->m_caching_layer->get_page(node, (void**)&node_memory));
     node_header* header = (node_header*)node_memory;
     if (header->is_leaf)
     {
@@ -70,7 +81,7 @@ result_t btree_impl::insert(int node, buffer key, buffer value)
     return result;
 }
 
-result_t btree_impl::leaf_insert(void* node_memory, buffer key, buffer value)
+result_t btree_impl::leaf_insert(uint8_t* node_memory, buffer key, buffer value)
 {    
     result_t result = result_t::success;
     node_header* header = (node_header*)node_memory;
@@ -84,9 +95,25 @@ result_t btree_impl::leaf_insert(void* node_memory, buffer key, buffer value)
     return result;
 }
 
-result_t btree_impl::internal_insert(void* node_memory, buffer key, buffer value)
+result_t btree_impl::internal_insert(uint8_t* node_memory, buffer key, buffer value)
 {
     result_t result = result_t::success;
     IfFalseRet(false, result_t::not_implemented);
+    return result;
+}
+
+result_t btree_impl::get_key(uint8_t* node_memory, int index, buffer* key)
+{
+    result_t result = result_t::success;
+    IfFalseRet(key != nullptr, result_t::invalid_argument);
+    node_header* header = (node_header*)node_memory;
+    IfFalseRet(index >= 0, result_t::invalid_argument);
+    IfFalseRet(index < header->num_keys, result_t::invalid_argument);
+    uint16_t* last = (uint16_t*)(node_memory + PAGE_SIZE);
+    uint16_t offset = *(last - index - 1);
+    assert(offset < PAGE_SIZE);
+    uint16_t* buffer = (uint16_t*)(node_memory + offset);
+    key->size = *buffer;
+    key->data = (void*)(buffer + 1);
     return result;
 }
