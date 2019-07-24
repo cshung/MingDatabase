@@ -4,15 +4,15 @@
 class btree_impl
 {
 public:
-    btree_impl(caching_layer* caching_layer, int root);
+    btree_impl(caching_layer* caching_layer, comparator* comparator, int root);
     result_t initialize();
     result_t insert(buffer key, buffer value);
-    result_t close();
 private:
     result_t insert(int node, buffer key, buffer value);
     result_t leaf_insert(void* node_memory, buffer key, buffer value);
     result_t internal_insert(void* node_memory, buffer key, buffer value);
     caching_layer* m_caching_layer;
+    comparator* m_comparator;
     int m_root;
 };
 
@@ -24,9 +24,10 @@ struct node_header
     int num_keys;
 };
 
-btree_impl::btree_impl(caching_layer* caching_layer, int root)
+btree_impl::btree_impl(caching_layer* caching_layer, comparator* comparator, int root)
 {
     this->m_caching_layer = caching_layer;
+    this->m_comparator = comparator;
     this->m_root = root;
 }
 
@@ -42,6 +43,7 @@ result_t btree_impl::initialize()
         root_node->num_keys = 0;
         this->m_caching_layer->set_page_as_written(this->m_root);
     }
+    return result;
 }
 
 result_t btree_impl::insert(buffer key, buffer value)
@@ -49,11 +51,6 @@ result_t btree_impl::insert(buffer key, buffer value)
     result_t result = result_t::success;
     IfFailRet(this->insert(this->m_root, key, value));
     return result;
-}
-
-result_t btree_impl::close()
-{
-    return this->m_caching_layer->close();
 }
 
 result_t btree_impl::insert(int node, buffer key, buffer value)
@@ -78,6 +75,10 @@ result_t btree_impl::leaf_insert(void* node_memory, buffer key, buffer value)
     result_t result = result_t::success;
     node_header* header = (node_header*)node_memory;
     // Step 1: Find the location to perform the insertion
+    for (int i = 0; i < header->num_keys; i++)
+    {
+
+    }
 
     IfFalseRet(false, result_t::not_implemented);
     return result;

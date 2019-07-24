@@ -220,6 +220,8 @@ result_t allocator_layer_impl::compact()
 
         // TODO, is it possible to postpone the file I/O operation required for compacting?
         // TODO, if the page number is referenced, we need to make sure the reference is updated as well.
+        // In particular, we need to make sure the caching_layer is updated so that it won't get the wrong
+        // page cached.
         uint8_t buffer[PAGE_SIZE];
         IfFailRet(this->m_file_layer->read_page((int)data_slot, buffer));
         IfFailRet(this->m_file_layer->write_page((int)this->m_free_list[free_list_index_1], buffer));

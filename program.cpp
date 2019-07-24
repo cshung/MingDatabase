@@ -55,7 +55,8 @@ result_t run()
         IfFailRet(caching_layer.open("hello.db"));
         int root;
         IfFailRet(caching_layer.get_root(&root));
-        btree tree(&caching_layer, root);
+        string_comparator comp;
+        btree tree(&caching_layer, &comp, root);
         IfFailRet(tree.initialize());
 
         const char* key = "hello";
@@ -69,8 +70,7 @@ result_t run()
         val_buffer.size = 5;
 
         IfFailRet(tree.insert(key_buffer, val_buffer));
-
-        tree.close();
+        IfFailRet(caching_layer.close());
     }
 
     return result;
